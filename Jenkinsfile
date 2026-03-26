@@ -28,7 +28,7 @@ pipeline {
         // Uploading Docker image into ECR
         stage("Uploading to ECR"){
             steps{
-                sh "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $registry"
+                sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $registry"
                 sh "docker push $registry:${BUILD_NUMBER}"
             }
         }
@@ -65,45 +65,45 @@ pipeline {
         // }
     }
 }
-// pipeline {
-//     agent any
-//     environment{
-//         registry="497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website-repo"
+pipeline {
+    agent any
+    environment{
+        registry="497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website-repo"
         
-//     }
-//     stages {
-//         stage('Hello') {
-//             steps {
-//                 git 'https://github.com/naveen-nani66/static-website.git'
-//             }
-//         }
-//         stage ("Build Docker Image"){
-//             steps{
-//                 sh "docker build -t static-website-image:${BUILD_NUMBER} ."
-//             }
-//         }
-//         stage ("Docker run"){
-//             steps{
-//                 sh "docker run -itd --name static-website-cont -p 8082:80 static-website-image:${BUILD_NUMBER}"
-//             }
-//         }
-//         stage("AWS Configure"){
-//             steps{
-//                 withCredentials([[
-//                     $class:'AmazonWebServicesCredentialsBinding',
-//                     credentialsId: 'aws-jenkins',
-//                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-//                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]){
-//                         sh "aws s3 ls"
-//                     }
-//             }
-//         }
-//         stage("Docker login"){
-//             steps{
-//               sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 497339096730.dkr.ecr.us-east-1.amazonaws.com"
-//               sh "docker push static-website-image:${BUILD_NUMBER}"
-//             }
-//         }
-//     }
-// }
+    }
+    stages {
+        stage('Hello') {
+            steps {
+                git 'https://github.com/naveen-nani66/static-website.git'
+            }
+        }
+        stage ("Build Docker Image"){
+            steps{
+                sh "docker build -t static-website-image:${BUILD_NUMBER} ."
+            }
+        }
+        stage ("Docker run"){
+            steps{
+                sh "docker run -itd --name static-website-cont -p 8082:80 static-website-image:${BUILD_NUMBER}"
+            }
+        }
+        stage("AWS Configure"){
+            steps{
+                withCredentials([[
+                    $class:'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-jenkins',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]){
+                        sh "aws s3 ls"
+                    }
+            }
+        }
+        stage("Docker login"){
+            steps{
+              sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 497339096730.dkr.ecr.us-east-1.amazonaws.com"
+              sh "docker push static-website-image:${BUILD_NUMBER}"
+            }
+        }
+    }
+}
 
