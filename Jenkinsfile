@@ -1,12 +1,12 @@
 pipeline {
     agent any
     environment{
-        registry="357643164931.dkr.ecr.us-east-2.amazonaws.com/static-website-repo"
+        registry="497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website-repo"
     }
     stages {
         stage('Checkout') {
             steps {
-               checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/venkatreddybandi1999/static-website.git']])
+               checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/naveen-nani66/static-website.git']])
             }
         }
         
@@ -18,7 +18,7 @@ pipeline {
             post {
                 success {
                     echo "hello"
-                    // mail to: "venkatreddybandi1999@gmail.com"
+                    // mail to: "naveen.jalla97@gmail.com"
                     // subject: "status of image"
                     // body: "Image successfully built"
                 }
@@ -35,7 +35,7 @@ pipeline {
         
         // post {
         //     success {
-        //         mail to: "venkatreddybandi1999@gmail.com"
+        //         mail to: "naveen.jalla97@gmail.com"
         //         subject: "status of image"
         //         body: "Image successfully deployed to ECR"
         //     }
@@ -53,14 +53,14 @@ pipeline {
         // docker run
         stage("Docker run"){
             steps{
-                sh "docker run -itd --name website-cont -p 8081:80 $registry:${BUILD_NUMBER}"
+                sh "docker run -itd --name website-cont -p 8082:80 $registry:${BUILD_NUMBER}"
             }
         }
         // post {
         //     success {
-        //         mail to: "venkatreddybandi1999@gmail.com"
+        //         mail to: "naveen.jalla97@gmail.com"
         //         subject: "Status of Container"
-        //         body: "Image successfully built and container created , you can access with port 8081"
+        //         body: "Image successfully built and container created , you can access with port 8082"
         //     }
         // }
     }
@@ -68,13 +68,13 @@ pipeline {
 // pipeline {
 //     agent any
 //     environment{
-//         registry="357643164931.dkr.ecr.us-east-2.amazonaws.com/static-website-repo"
+//         registry="497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website-repo"
         
 //     }
 //     stages {
 //         stage('Hello') {
 //             steps {
-//                 git 'https://github.com/venkatreddybandi1999/static-website'
+//                 git 'https://github.com/naveen-nani66/static-website.git'
 //             }
 //         }
 //         stage ("Build Docker Image"){
@@ -84,7 +84,7 @@ pipeline {
 //         }
 //         stage ("Docker run"){
 //             steps{
-//                 sh "docker run -itd --name static-website-cont -p 8081:80 static-website-image:${BUILD_NUMBER}"
+//                 sh "docker run -itd --name static-website-cont -p 8082:80 static-website-image:${BUILD_NUMBER}"
 //             }
 //         }
 //         stage("AWS Configure"){
@@ -100,7 +100,7 @@ pipeline {
 //         }
 //         stage("Docker login"){
 //             steps{
-//               sh "aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 357643164931.dkr.ecr.us-east-2.amazonaws.com"
+//               sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 497339096730.dkr.ecr.us-east-1.amazonaws.com"
 //               sh "docker push static-website-image:${BUILD_NUMBER}"
 //             }
 //         }
