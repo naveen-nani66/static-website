@@ -49,13 +49,13 @@ stage("Uploading to ECR"){
         // }
         
         // stopping previous container and removing
-        stage("Stopping previous container"){
-            steps{
-                sh "docker ps -f name=website-cont -q |xargs --no-run-if-empty docker container stop"
-                sh "docker rm website-cont"
-                // sh "docker ls -a -f name=website-cont -q | xargs -r docker container rm"
-            }
-        }
+        // stage("Stopping previous container"){
+        //     steps{
+        //         sh "docker ps -f name=website-cont -q |xargs --no-run-if-empty docker container stop"
+        //         sh "docker rm website-cont"
+        //         // sh "docker ls -a -f name=website-cont -q | xargs -r docker container rm"
+        //     }
+        // }
         
         // docker run
         stage("Docker run"){
