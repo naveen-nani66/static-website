@@ -26,12 +26,19 @@ pipeline {
         }
                 
         // Uploading Docker image into ECR
-        stage("Uploading to ECR"){
-            steps{
-                sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $registry"
-                sh "docker push $registry:${BUILD_NUMBER}"
-            }
+stage("Uploading to ECR"){
+    steps{
+        withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-jenkins',
+            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        ]]) {
+            sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $registry"
+            sh "docker push $registry:${BUILD_NUMBER}"
         }
+    }
+}
         
         // post {
         //     success {
