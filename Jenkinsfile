@@ -50,10 +50,10 @@ pipeline {
                         """
 
                         // 2. Replace BUILD_TAG placeholder in your k8s-deployment.yaml
-                        sh "sed -i 's/BUILD_TAG/${BUILD_NUMBER}/g' k8s-deployment.yaml"
+                        sh "sed -i 's/BUILD_TAG/${BUILD_NUMBER}/g' deploy.yml"
 
                         // 3. Apply to Minikube
-                        sh "kubectl apply -f k8s-deployment.yaml"
+                        sh "kubectl apply -f deploy.yaml"
 
                         // 4. Wait for healthy rollout
                         sh "kubectl rollout status deployment/static-website"
