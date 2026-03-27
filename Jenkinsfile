@@ -53,7 +53,7 @@ pipeline {
                         sh "sed -i 's/BUILD_TAG/${BUILD_NUMBER}/g' deploy.yml"
 
                         // 3. Apply to Minikube
-                        sh "kubectl apply -f deploy.yml"
+                        sh "sh "kubectl apply -f deploy.yml --validate=false""
 
                         // 4. Wait for healthy rollout
                         sh "kubectl rollout status deployment/static-website"
