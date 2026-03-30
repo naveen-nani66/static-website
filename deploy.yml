@@ -16,6 +16,7 @@ spec:
       - name: static-website-container
         # Replace 'latest' with your actual build number if needed
         image: 497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
       imagePullSecrets:
