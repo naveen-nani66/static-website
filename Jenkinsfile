@@ -16,7 +16,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t $registry:${BUILD_NUMBER} ."
+                sh "docker build --no-cache -t ${ECR_URL}/${REPO_NAME}:latest ."
             }
         }
 
