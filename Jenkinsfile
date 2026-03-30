@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        registry = "497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website-repo"
+        registry = "497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website"
         region = "us-east-1"
     }
     stages {
