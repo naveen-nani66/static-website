@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    triggers {
+        githubPush() // This tells the pipeline to wake up on webhook events
+    }
     environment {
         registry = "497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website-repo"
         region = "us-east-1"
