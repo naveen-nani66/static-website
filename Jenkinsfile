@@ -5,6 +5,7 @@ pipeline {
     }
     environment {
         registry = "497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website"
+        REPO_NAME  = "static-website"
         region = "us-east-1"
     }
     stages {
