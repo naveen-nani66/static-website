@@ -1,0 +1,84 @@
+pipeline {
+    agent any
+    triggers {
+        githubPush() 
+    }
+    environment {
+        // Your ECR URI (Registry + Repo name)
+        REGISTRY   = "497339096730.dkr.ecr.us-east-1.amazonaws.com/static-website"
+        // Just the Registry (for docker login)
+        ECR_URL    = "497339096730.dkr.ecr.us-east-1.amazonaws.com"
+        REGION     = "us-east-1"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/naveen-nani66/static-website.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build --no-cache -t ${REGISTRY}:${BUILD_NUMBER} ."
+                sh "docker tag ${REGISTRY}:${BUILD_NUMBER} ${REGISTRY}:latest"
+            }
+        }
+
+        stage("Uploading to ECR") {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                                  credentialsId: 'aws-jenkins', 
+                                  accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
+                                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    // Login using ECR_URL (the domain only)
+                    sh "aws ecr get-login-password --region ${REGION} | docker login --username AWS --password-stdin ${ECR_URL}"
+                    sh "docker push ${REGISTRY}:${BUILD_NUMBER}"
+                    sh "docker push ${REGISTRY}:latest"
+                }
+            }
+        }
+
+        stage("Deploy to Kubernetes") {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                                  credentialsId: 'aws-jenkins', 
+                                  accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
+                                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                    script {
+                        // 1. CRITICAL: Refresh the ECR secret so K8s can pull the image
+                        // This fixes the "Authorization Expired" error you saw in Events
+                        sh """
+                        TOKEN=\$(aws ecr get-login-password --region ${REGION})
+                        kubectl delete secret ecr-registry-helper --ignore-not-found
+                        kubectl create secret docker-registry ecr-registry-helper \
+                            --docker-server=${ECR_URL} \
+                            --docker-username=AWS \
+                            --docker-password=\$TOKEN
+                        """
+
+                        // 2. Update the image tag in deploy.yml
+                        // Make sure your deploy.yml has "image: ...:BUILD_TAG"
+                        sh "sed -i 's/BUILD_TAG/${BUILD_NUMBER}/g' deploy.yml"
+
+                        // 3. Apply and wait for status
+                        sh "kubectl apply -f deploy.yml"
+                        
+                        // We use a timeout so Jenkins doesn't hang forever if the pull fails again
+                        sh "kubectl rollout status deployment/static-website --timeout=90s"
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            sh "docker rmi ${REGISTRY}:${BUILD_NUMBER} || true"
+            sh "docker image prune -f"
+            echo "Deployment to Minikube Successful!"
+        }
+        failure {
+            echo "Deployment failed. Check 'kubectl describe pods' for errors."
+        }
+    }
+}
